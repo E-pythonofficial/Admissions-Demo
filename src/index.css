@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-wa-bg: #E5DDD5;
+  --color-wa-header: #075E54;
+  --color-wa-bubble-me: #DCF8C6;
+  --color-wa-bubble-other: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply antialiased overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .whatsapp-bg {
+    background-color: #e5ddd5;
+    background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+    background-repeat: repeat;
+    background-size: 400px;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
