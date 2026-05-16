@@ -9,7 +9,7 @@ export const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initialMessages: Message[] = [
@@ -30,18 +30,28 @@ export const ChatInterface: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Fix mobile keyboard: track visualViewport so the footer never hides behind the keyboard
   useEffect(() => {
-    const handleResize = () => {
-      if (window.visualViewport && viewportRef.current) {
-        viewportRef.current.style.height = `${window.visualViewport.height}px`;
-        scrollToBottom();
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+
+    const handleViewportChange = () => {
+      if (containerRef.current) {
+        containerRef.current.style.height = `${viewport.height}px`;
+        containerRef.current.style.top = `${viewport.offsetTop}px`;
       }
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     };
-    window.visualViewport?.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('scroll', handleResize);
+
+    viewport.addEventListener('resize', handleViewportChange);
+    viewport.addEventListener('scroll', handleViewportChange);
+    handleViewportChange(); // set on mount
+
     return () => {
-      window.visualViewport?.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('scroll', handleResize);
+      viewport.removeEventListener('resize', handleViewportChange);
+      viewport.removeEventListener('scroll', handleViewportChange);
     };
   }, []);
 
@@ -108,15 +118,17 @@ export const ChatInterface: React.FC = () => {
 
   return (
     <div
-      ref={viewportRef}
+      ref={containerRef}
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        position: 'fixed',        /* Tracks visual viewport on mobile */
+        top: 0,
+        left: 0,
+        right: 0,
         width: '100%',
-        position: 'relative',
+        height: '100%',           /* Updated by visualViewport listener */
         overflow: 'hidden',
-        /* WhatsApp chat background */
         backgroundColor: '#efeae2',
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:none;stroke:%23c8bdb3;stroke-width:0.4;opacity:0.5%7D%3C/style%3E%3C/defs%3E%3Ccircle class='a' cx='20' cy='20' r='6'/%3E%3Ccircle class='a' cx='80' cy='20' r='6'/%3E%3Ccircle class='a' cx='50' cy='50' r='6'/%3E%3Ccircle class='a' cx='20' cy='80' r='6'/%3E%3Ccircle class='a' cx='80' cy='80' r='6'/%3E%3Cpath class='a' d='M20 20 Q50 10 80 20'/%3E%3Cpath class='a' d='M20 80 Q50 90 80 80'/%3E%3Cpath class='a' d='M20 20 Q10 50 20 80'/%3E%3Cpath class='a' d='M80 20 Q90 50 80 80'/%3E%3Cpath class='a' d='M20 50 Q50 40 80 50'/%3E%3C/svg%3E")`,
         backgroundRepeat: 'repeat',
@@ -181,6 +193,7 @@ export const ChatInterface: React.FC = () => {
         gap: 4,
         scrollbarWidth: 'none',
         msOverflowStyle: 'none',
+        WebkitOverflowScrolling: 'touch',
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
           <span style={{
@@ -234,13 +247,14 @@ export const ChatInterface: React.FC = () => {
         <div ref={messagesEndRef} style={{ height: 8 }} />
       </div>
 
-      {/* Input area */}
+      {/* Input area - bg matches chat so no dark bleed behind keyboard */}
       <footer style={{
         padding: '8px 12px',
+        paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
         display: 'flex',
         alignItems: 'flex-end',
         gap: 8,
-        backgroundColor: 'transparent',
+        backgroundColor: '#efeae2',   /* Same as chat bg — no dark gap */
         zIndex: 10,
         flexShrink: 0,
       }}>
@@ -265,7 +279,7 @@ export const ChatInterface: React.FC = () => {
               flex: 1,
               border: 'none',
               outline: 'none',
-              fontSize: 15,
+              fontSize: 16,        /* 16px stops iOS from auto-zooming on focus */
               color: '#111b21',
               backgroundColor: 'transparent',
               fontFamily: 'inherit',
