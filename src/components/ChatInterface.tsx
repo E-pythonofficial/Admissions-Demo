@@ -11,7 +11,6 @@ export const ChatInterface: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Initial greeting
   useEffect(() => {
     const initialMessages: Message[] = [
       {
@@ -27,29 +26,19 @@ export const ChatInterface: React.FC = () => {
         timestamp: new Date(),
       }
     ];
-
-    const timer = setTimeout(() => {
-      setMessages(initialMessages);
-    }, 500);
-
+    const timer = setTimeout(() => setMessages(initialMessages), 500);
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle mobile keyboard and scrolling
   useEffect(() => {
     const handleResize = () => {
-      if (window.visualViewport) {
-        // Adjust the height to match visual viewport (handling soft keyboard)
-        if (viewportRef.current) {
-          viewportRef.current.style.height = `${window.visualViewport.height}px`;
-        }
+      if (window.visualViewport && viewportRef.current) {
+        viewportRef.current.style.height = `${window.visualViewport.height}px`;
         scrollToBottom();
       }
     };
-
     window.visualViewport?.addEventListener('resize', handleResize);
     window.visualViewport?.addEventListener('scroll', handleResize);
-    
     return () => {
       window.visualViewport?.removeEventListener('resize', handleResize);
       window.visualViewport?.removeEventListener('scroll', handleResize);
@@ -85,17 +74,15 @@ export const ChatInterface: React.FC = () => {
       }));
 
       const response = await getTolaResponse(input, history);
-      
+
       for (const [index, text] of response.messages.entries()) {
         await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1200));
-        
         const newMsg: Message = {
           id: `tola-${Date.now()}-${index}-${Math.random()}`,
           sender: Sender.TOLA,
-          text: text,
+          text,
           timestamp: new Date(),
         };
-        
         setMessages(prev => [...prev, newMsg]);
       }
     } catch (error) {
@@ -106,7 +93,7 @@ export const ChatInterface: React.FC = () => {
   };
 
   const clearChat = () => {
-    if (confirm("Clear this chat?")) {
+    if (confirm('Clear this chat?')) {
       setMessages([]);
       setTimeout(() => {
         setMessages([{
@@ -120,105 +107,191 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div 
+    <div
       ref={viewportRef}
-      className="flex flex-col h-full w-full max-w-md mx-auto bg-[#E5DDD5] shadow-2xl relative overflow-hidden whatsapp-bg"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        /* WhatsApp chat background */
+        backgroundColor: '#efeae2',
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cstyle%3E.a%7Bfill:none;stroke:%23c8bdb3;stroke-width:0.4;opacity:0.5%7D%3C/style%3E%3C/defs%3E%3Ccircle class='a' cx='20' cy='20' r='6'/%3E%3Ccircle class='a' cx='80' cy='20' r='6'/%3E%3Ccircle class='a' cx='50' cy='50' r='6'/%3E%3Ccircle class='a' cx='20' cy='80' r='6'/%3E%3Ccircle class='a' cx='80' cy='80' r='6'/%3E%3Cpath class='a' d='M20 20 Q50 10 80 20'/%3E%3Cpath class='a' d='M20 80 Q50 90 80 80'/%3E%3Cpath class='a' d='M20 20 Q10 50 20 80'/%3E%3Cpath class='a' d='M80 20 Q90 50 80 80'/%3E%3Cpath class='a' d='M20 50 Q50 40 80 50'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '100px 100px',
+      }}
     >
-      {/* WhatsApp-style Header */}
-      <header className="bg-[#075E54] text-white p-3 py-4 flex items-center justify-between shadow-md z-10 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-10 h-10 bg-slate-200 rounded-full overflow-hidden border border-white/20">
-              <img 
-                src="https://ui-avatars.com/api/?name=Tola+Admissions&background=DCF8C6&color=075E54" 
-                alt="Tola" 
-                className="w-full h-full object-cover"
+      {/* Header */}
+      <header style={{
+        backgroundColor: '#202c33',
+        color: 'white',
+        padding: '10px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+        zIndex: 10,
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              width: 40, height: 40,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}>
+              <img
+                src="https://ui-avatars.com/api/?name=Tola+Admissions&background=DCF8C6&color=075E54"
+                alt="Tola"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#25D366] rounded-full border border-[#075E54]"></div>
+            <div style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 10, height: 10,
+              backgroundColor: '#25D366',
+              borderRadius: '50%',
+              border: '2px solid #202c33',
+            }} />
           </div>
           <div>
-            <h2 className="font-bold text-sm leading-tight">Tola</h2>
-            <p className="text-[10px] text-white/80">online</p>
+            <p style={{ fontWeight: 600, fontSize: 15, lineHeight: 1.2 }}>Tola</p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>online</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 pr-1">
-          <Video size={18} className="opacity-80 active:opacity-100" />
-          <Phone size={18} className="opacity-80 active:opacity-100" />
-          <button onClick={clearChat}>
-            <MoreVertical size={18} className="opacity-80 active:opacity-100" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <Video size={20} style={{ opacity: 0.8, cursor: 'pointer' }} />
+          <Phone size={20} style={{ opacity: 0.8, cursor: 'pointer' }} />
+          <button onClick={clearChat} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white' }}>
+            <MoreVertical size={20} style={{ opacity: 0.8 }} />
           </button>
         </div>
       </header>
 
-      {/* Messages list with correct scroll handling */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-hide">
-        <div className="flex justify-center my-4">
-          <span className="bg-[#D1E9F6] text-[#557F95] text-[10px] sm:text-xs px-3 py-1 rounded-lg uppercase font-semibold shadow-sm">
-            Tola - Admissions Support
+      {/* Messages */}
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '12px 0' }}>
+          <span style={{
+            backgroundColor: '#d1e9f6',
+            color: '#557f95',
+            fontSize: 11,
+            padding: '4px 12px',
+            borderRadius: 8,
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            Tola — Admissions Support
           </span>
         </div>
-        
+
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
           ))}
+
           {isTyping && (
             <motion.div
+              key="typing"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0 }}
-              className="flex justify-start items-start"
+              style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 4 }}
             >
-              <div className="bg-white rounded-lg rounded-tl-none p-2 px-3 shadow-sm flex items-center gap-1">
-                <div className="flex gap-1.5 items-center h-4">
+              <div style={{
+                backgroundColor: 'white',
+                borderRadius: '8px 8px 8px 0',
+                padding: '10px 14px',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+                display: 'flex',
+                gap: 5,
+                alignItems: 'center',
+              }}>
+                {[0, 0.15, 0.3].map((delay, i) => (
                   <motion.div
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ repeat: Infinity, duration: 1 }}
-                    className="w-1 h-1 bg-slate-400 rounded-full"
+                    key={i}
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ repeat: Infinity, duration: 0.6, delay }}
+                    style={{ width: 7, height: 7, backgroundColor: '#8696a0', borderRadius: '50%' }}
                   />
-                  <motion.div
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                    className="w-1 h-1 bg-slate-400 rounded-full"
-                  />
-                  <motion.div
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                    className="w-1 h-1 bg-slate-400 rounded-full"
-                  />
-                </div>
+                ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
-        <div ref={messagesEndRef} className="h-2" />
+        <div ref={messagesEndRef} style={{ height: 8 }} />
       </div>
 
-      {/* WhatsApp Input Area */}
-      <footer className="p-2 sm:p-3 flex items-end gap-2 bg-transparent z-10">
-        <div className="flex-1 bg-white rounded-full p-2 pl-4 shadow-sm flex items-center gap-3">
-          <Smile size={24} className="text-slate-400 hidden sm:block" />
+      {/* Input area */}
+      <footer style={{
+        padding: '8px 12px',
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: 8,
+        backgroundColor: 'transparent',
+        zIndex: 10,
+        flexShrink: 0,
+      }}>
+        <div style={{
+          flex: 1,
+          backgroundColor: 'white',
+          borderRadius: 24,
+          padding: '8px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+        }}>
+          <Smile size={22} style={{ color: '#8696a0', flexShrink: 0 }} />
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type a message"
-            className="flex-1 bg-transparent border-none outline-none text-sm sm:text-base text-slate-800 py-1"
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              fontSize: 15,
+              color: '#111b21',
+              backgroundColor: 'transparent',
+              fontFamily: 'inherit',
+            }}
           />
-          <Paperclip size={24} className="text-slate-400 rotate-45" />
+          <Paperclip size={22} style={{ color: '#8696a0', transform: 'rotate(45deg)', flexShrink: 0 }} />
         </div>
         <button
           onClick={handleSend}
           disabled={!input.trim() || isTyping}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-md shrink-0 ${
-            !input.trim() || isTyping 
-              ? 'bg-slate-400 text-white' 
-              : 'bg-[#075E54] text-white active:scale-90'
-          }`}
+          style={{
+            width: 48, height: 48,
+            borderRadius: '50%',
+            backgroundColor: input.trim() && !isTyping ? '#00a884' : '#8696a0',
+            color: 'white',
+            border: 'none',
+            cursor: input.trim() && !isTyping ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'background-color 0.2s, transform 0.1s',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+          }}
         >
-          <Send size={20} className={!input.trim() ? "translate-x-0" : "translate-x-0.5"} />
+          <Send size={20} />
         </button>
       </footer>
     </div>
@@ -232,34 +305,35 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`flex items-start ${isTola ? 'justify-start' : 'justify-end'}`}
+      style={{
+        display: 'flex',
+        justifyContent: isTola ? 'flex-start' : 'flex-end',
+        marginBottom: 2,
+      }}
     >
-      <div
-        className={`max-w-[75%] sm:max-w-[85%] px-3 py-1.5 rounded-lg shadow-sm relative ${
-          isTola
-            ? 'bg-white text-slate-800 rounded-tl-none'
-            : 'bg-[#DCF8C6] text-slate-800 rounded-tr-none'
-        }`}
-      >
-        {/* Tail decoration for chat bubbles */}
-        <div 
-          className={`absolute top-0 w-2 h-2 ${
-            isTola 
-              ? '-left-1 bg-white triangle-left' 
-              : '-right-1 bg-[#DCF8C6] triangle-right'
-          }`}
-          style={{ clipPath: isTola ? 'polygon(100% 0, 0 0, 100% 100%)' : 'polygon(0 0, 0 100%, 100% 0)' }}
-        />
-        
-        <p className="text-[13px] sm:text-[15px] leading-tight pr-10">{message.text}</p>
-        <div className="absolute bottom-1 right-2 flex items-center gap-1">
-          <span className="text-[9px] text-slate-400 select-none">
+      <div style={{
+        maxWidth: '75%',
+        padding: '7px 12px 22px',
+        borderRadius: isTola ? '8px 8px 8px 0' : '8px 8px 0 8px',
+        backgroundColor: isTola ? '#ffffff' : '#d9fdd3',
+        color: '#111b21',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+        position: 'relative',
+      }}>
+        <p style={{ fontSize: 14.5, lineHeight: 1.45, margin: 0 }}>{message.text}</p>
+        <div style={{
+          position: 'absolute',
+          bottom: 5,
+          right: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 3,
+        }}>
+          <span style={{ fontSize: 10, color: '#8696a0' }}>
             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
           {!isTola && (
-            <div className="flex -space-x-1">
-               <span className="text-[10px] text-blue-500 font-bold">✓✓</span>
-            </div>
+            <span style={{ fontSize: 12, color: '#53bdeb', fontWeight: 700 }}>✓✓</span>
           )}
         </div>
       </div>

@@ -46,7 +46,7 @@ Example:
 export async function getTolaResponse(userMessage: string, history: { role: 'user' | 'model', parts: { text: string }[] }[]): Promise<TolaResponse> {
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-2.0-flash-lite",
       contents: [
         ...history,
         { role: 'user', parts: [{ text: userMessage }] }
